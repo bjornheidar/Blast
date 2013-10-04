@@ -8,7 +8,9 @@ public class Lazor extends Collidable {
 	private long age;
 	
 	public Lazor(float x, float y, Vector2 shipspeed, float shipheading){
-		super(x, y, 8, new Texture(Gdx.files.internal("resources/img/lazor.png")));
+		super(x, y, new Texture(Gdx.files.internal("resources/img/lazor.png")));
+		
+		this.size = sprite.getTexture().getHeight();
 		
 		this.speed.set(new Vector2(0,7).rotate(shipheading).add(shipspeed));
 		this.age = System.currentTimeMillis();
@@ -21,9 +23,5 @@ public class Lazor extends Collidable {
 		}
 		
 		return true;
-	}
-
-	public void dispose() {
-		this.sprite.getTexture().dispose();
 	}
 }

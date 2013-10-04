@@ -2,6 +2,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 
@@ -10,11 +11,9 @@ public class Collidable {
 	protected Sprite sprite;
 	protected int size;
 	
-	public Collidable(float x, float y, int size, Texture tex){
+	public Collidable(float x, float y, Texture tex){
 		this.sprite = new Sprite(tex);
 		this.sprite.setPosition(x, y);
-		
-		this.size = size;
 
 		this.speed = new Vector2();
 	}
@@ -51,5 +50,13 @@ public class Collidable {
 	
 	public void draw(SpriteBatch batch) {
 		sprite.draw(batch);
+	}
+	
+	public void dispose() {
+		this.sprite.getTexture().dispose();
+	}
+	
+	public Rectangle getBoundingRectangle(){
+		return sprite.getBoundingRectangle();
 	}
 }

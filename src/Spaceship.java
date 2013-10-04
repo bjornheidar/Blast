@@ -1,14 +1,17 @@
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.audio.Sound;
 
 
 public class Spaceship extends Collidable {
 	private final int heading_change = 4;
 	private Vector2 speedchange = new Vector2(0, 0.19f);
+	Sound lazorFire = Gdx.audio.newSound(Gdx.files.internal("resources/sounds/151022__bubaproducer__laser-shot-silenced.wav"));
 	
 	public Spaceship(float x, float y){
-		super(x, y, 32, new Texture(Gdx.files.internal("resources/img/ship.png")));
+		super(x, y, new Texture(Gdx.files.internal("resources/img/ship.png")));
+		this.size = sprite.getTexture().getHeight();
 	}
 
 	public void stop() {
@@ -33,6 +36,18 @@ public class Spaceship extends Collidable {
 	}
 	
 	public Lazor fire(){
-		return new Lazor(sprite.getX()+12, sprite.getY()+24, speed, sprite.getRotation());
+		//TODO fix where lazor appears
+		lazorFire.play();
+		return new Lazor(sprite.getX(), sprite.getY(), speed, sprite.getRotation());
+	}
+
+	public void setPos(int x, int y) {
+		sprite.setPosition(x, y);
+		speed.set(0, 0);
+	}
+
+	public void explode() {
+		// TODO Sýna sprengingu
+		
 	}
 }
