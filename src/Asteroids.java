@@ -1,12 +1,15 @@
 import java.util.ArrayList;
 import java.util.Random;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Intersector;
 
@@ -24,8 +27,23 @@ public class Asteroids implements ApplicationListener {
 	
 	private Spaceship deathstar;
 	private boolean renderShip;
+	
 	private final long fire_rate = 500;
 	private long lastShot;
+	
+	private int score;
+	private BitmapFont font;
+	private BitmapFont largeFont;
+	
+	private long wintime;
+	private boolean haswon;
+	private Sound win;
+	
+	private int lives;
+	private Texture livestex;
+	private long deathtime;
+	private Sound gameover;
+	private boolean lost;
 	
 	private static Random r = new Random();
 	
@@ -47,6 +65,18 @@ public class Asteroids implements ApplicationListener {
 		deathstar = new Spaceship(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
 		renderShip = true;
 		lastShot =  0;
+		lives = 0;
+		livestex = new Texture(Gdx.files.internal("resources/img/lives.png"));
+		gameover = Gdx.audio.newSound(Gdx.files.internal("resources/sounds/lose.mp3"));
+		lost = false;
+		
+		score = 0;
+		font = new BitmapFont();
+		largeFont = new BitmapFont();
+		largeFont.setScale(3f);
+		
+		haswon = false;
+		win =  Gdx.audio.newSound(Gdx.files.internal("resources/sounds/winning.mp3"));
 		
 		this.initializeMeteors();
 		
@@ -97,16 +127,25 @@ public class Asteroids implements ApplicationListener {
 	        }
 		}
 		
-		deathstar.update();
-		
+		if(renderShip){
+			deathstar.update();
+		}
+		else if(!lost && System.currentTimeMillis() - deathtime > 3000){
+			respawn();
+		}
+		else if(lost && System.currentTimeMillis() - deathtime > 10000){
+			Gdx.app.exit();
+		}
+			
 		//Check for collisions
 		for(Meteor m : meteors){
 			m.update();
 			//Check for Ship/Meteor Collision
 			if(Intersector.overlapRectangles(deathstar.getBoundingRectangle(), m.getBoundingRectangle())){
-				renderShip = false;
-				deathstar.explode();
-				deathstar.setPos(-100, -100);
+				if(System.currentTimeMillis() - deathtime > 5000){
+					deathtime = System.currentTimeMillis();
+					death();
+				}
 			}
 			
 			//Check for shot/Meteor collision
@@ -114,8 +153,8 @@ public class Asteroids implements ApplicationListener {
 				if(Intersector.overlapRectangles(m.getBoundingRectangle(), l.getBoundingRectangle())){
 					explodedMeteors.add(m);
 					newMeteors.addAll(m.explode());
-					//m.dispose();
 					landedShots.add(l);
+					score++;
 				}
 			}
 		}
@@ -135,6 +174,20 @@ public class Asteroids implements ApplicationListener {
 		newMeteors.clear();
 		explodedMeteors.clear();
 		landedShots.clear();
+		
+		//Winning
+		if(meteors.isEmpty() && !haswon){
+			win.play();
+			wintime = System.currentTimeMillis();
+			haswon = true;
+		}
+		
+		//After some time new level
+		if(haswon && System.currentTimeMillis() - wintime > 4000){
+			win.stop();
+			haswon = false;
+			initializeMeteors();
+		}
 		
 		int i = 0;
 		Lazor s;
@@ -167,7 +220,23 @@ public class Asteroids implements ApplicationListener {
 			l.draw(batch);
 		}
 		
-		deathstar.draw(batch);
+		if(renderShip){
+			deathstar.draw(batch);
+		}
+		
+		for(int i = 0; i < lives; i++){
+			batch.draw(livestex, 10 + i * 30, Gdx.graphics.getHeight() - 40);
+		}
+		
+		font.draw(batch, "Score: " + score, 10, Gdx.graphics.getHeight() - 60);
+		
+		if(lost){
+			largeFont.draw(batch, "Game Over", Gdx.graphics.getWidth()/2 -100, Gdx.graphics.getHeight()/2+50);
+			largeFont.draw(batch, "Score: " + score, Gdx.graphics.getWidth()/2 -100, Gdx.graphics.getHeight()/2);
+			if(score == 0){
+				largeFont.draw(batch, "You suck!", Gdx.graphics.getWidth()/2 -100,  Gdx.graphics.getHeight()/2 -50);
+			}
+		}
 		
 		batch.end();
 	}
@@ -185,8 +254,32 @@ public class Asteroids implements ApplicationListener {
 	}
 	
 	private void initializeMeteors(){
-		for(int i = 0; i < 4 + Asteroids.r.nextInt(4); i++){
-            meteors.add(new Meteor(0));
+		for(int i = 0; i < 2 + Asteroids.r.nextInt(4); i++){
+            meteors.add(new Meteor(2));
 		}
+		//meteors.add(new Meteor(0));
+	}
+	
+	private void death(){
+		deathstar.setPos(-1000, -1000);
+		renderShip = false;
+		deathstar.explode();
+		
+		if(lives == 0){
+			gameOver();
+		}
+		else{
+			lives--;
+		}
+	}
+	
+	private void respawn(){
+		renderShip = true;
+		deathstar.setPos(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
+	}
+	
+	private void gameOver(){
+		gameover.play();
+		lost = true;
 	}
 }

@@ -7,7 +7,7 @@ import com.badlogic.gdx.audio.Sound;
 public class Spaceship extends Collidable {
 	private final int heading_change = 4;
 	private Vector2 speedchange = new Vector2(0, 0.19f);
-	Sound lazorFire = Gdx.audio.newSound(Gdx.files.internal("resources/sounds/151022__bubaproducer__laser-shot-silenced.wav"));
+	private Sound lazorFire = Gdx.audio.newSound(Gdx.files.internal("resources/sounds/lazor.wav"));
 	
 	public Spaceship(float x, float y){
 		super(x, y, new Texture(Gdx.files.internal("resources/img/ship.png")));

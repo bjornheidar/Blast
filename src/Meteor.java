@@ -64,8 +64,8 @@ public class Meteor extends Collidable {
 		
 		this.size = sprite.getTexture().getHeight();
 		
-		float speedX = r.nextFloat() * 2 + 1;
-		float speedY = r.nextFloat() * 2 + 1;
+		float speedX = r.nextFloat() * 1.5f + (2-metSize);
+		float speedY = r.nextFloat() * 1.5f + (2-metSize);
 		
 		if(r.nextInt(10) > 4){
 			speedX *= -1;
