@@ -5,7 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 
 public class Explosion {
 	
-	private final long frameswitch = 100;
+	private final long frameswitch = 90;
 	
 	private long lastframe;
 	private int frame;
@@ -31,7 +31,6 @@ public class Explosion {
 		}
 		
 		if(frame < texture.length){
-			System.out.println("drawing");
 			batch.draw(texture[frame], pos.x, pos.y);
 		}
 		else{

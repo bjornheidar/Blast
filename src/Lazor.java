@@ -12,7 +12,7 @@ public class Lazor extends Collidable {
 		
 		this.size = sprite.getTexture().getHeight();
 		
-		this.speed.set(new Vector2(0,7).rotate(shipheading).add(shipspeed));
+		this.speed.set(new Vector2(0,8).rotate(shipheading).add(shipspeed));
 		this.age = System.currentTimeMillis();
 	}
 	

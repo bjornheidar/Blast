@@ -48,11 +48,6 @@ public class Spaceship extends Collidable {
 		speed.set(0, 0);
 	}
 
-	public void explode() {
-		// TODO Sýna sprengingu
-		
-	}
-
 	public int getSize() {
 		return this.size;
 	}

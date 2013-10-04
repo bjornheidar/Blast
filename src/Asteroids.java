@@ -1,7 +1,6 @@
 import java.util.ArrayList;
 import java.util.Random;
 
-import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -17,6 +16,7 @@ import com.badlogic.gdx.math.Intersector;
 public class Asteroids implements ApplicationListener {
 	private static SpriteBatch batch;
 	private OrthographicCamera camera;
+	private boolean showintro = true;
 	
 	private ArrayList<Meteor> meteors;
 	private ArrayList<Meteor> newMeteors;
@@ -90,7 +90,7 @@ public class Asteroids implements ApplicationListener {
 		
 		this.initializeMeteors();
 		
-		Gdx.gl11.glClearColor(.3f, .3f, .3f, 1f);
+		Gdx.gl11.glClearColor(0, 0, 0, 1f);
 	}
 
 	@Override
@@ -111,6 +111,12 @@ public class Asteroids implements ApplicationListener {
 	}
 	
 	private void update(){
+		if(showintro){
+			if(deathstar.getX() != Gdx.graphics.getWidth()/2){
+				showintro = false;
+			}
+		}
+		
 		if(this.renderShip){
 			//Arrowkeys
 			if(Gdx.input.isKeyPressed(Keys.RIGHT))
@@ -242,7 +248,6 @@ public class Asteroids implements ApplicationListener {
 		boolean drawn;
 		for(Explosion e : explos){
 			drawn = e.draw();
-			System.out.println(drawn);
 			if(!drawn){
 				doneexplos.add(e);
 			}
@@ -259,6 +264,11 @@ public class Asteroids implements ApplicationListener {
 		
 		font.draw(batch, "Score: " + score, 10, Gdx.graphics.getHeight() - 45);
 		font.draw(batch, "Level " + level, 10, Gdx.graphics.getHeight() - 60);
+		
+		if(showintro){
+			largeFont.draw(batch, "Pilot! You are lost and your gun is wonky!", Gdx.graphics.getWidth()/2 -390, Gdx.graphics.getHeight()/2+100);
+			largeFont.draw(batch, "Watch out for the incoming meteors!", Gdx.graphics.getWidth()/2 -350, Gdx.graphics.getHeight()/2+50);
+		}
 		
 		if(haswon && !lost){
 			largeFont.draw(batch, "Level " + (level-1) + " Complete", Gdx.graphics.getWidth()/2 -150, Gdx.graphics.getHeight()/2+50);
@@ -289,16 +299,14 @@ public class Asteroids implements ApplicationListener {
 	}
 	
 	private void initializeMeteors(){
-		/*for(int i = 0; i < level + Asteroids.r.nextInt(3); i++){
+		for(int i = 0; i < level + Asteroids.r.nextInt(3); i++){
             meteors.add(new Meteor(2));
-		}*/
-		meteors.add(new Meteor(0));
+		}
 	}
 	
 	private void death(Meteor m){
 		deathstar.setPos(-1000, -1000);
 		renderShip = false;
-		deathstar.explode();
 		explodedMeteors.add(m);
 		newMeteors.addAll(m.explode());
 		
