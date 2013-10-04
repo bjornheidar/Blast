@@ -50,4 +50,8 @@ public class Spaceship extends Collidable {
 		// TODO Sýna sprengingu
 		
 	}
+
+	public int getSize() {
+		return this.size;
+	}
 }

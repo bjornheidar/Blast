@@ -114,7 +114,7 @@ public class Asteroids implements ApplicationListener {
 				if(Intersector.overlapRectangles(m.getBoundingRectangle(), l.getBoundingRectangle())){
 					explodedMeteors.add(m);
 					newMeteors.addAll(m.explode());
-					m.dispose();
+					//m.dispose();
 					landedShots.add(l);
 				}
 			}
@@ -185,11 +185,8 @@ public class Asteroids implements ApplicationListener {
 	}
 	
 	private void initializeMeteors(){
-		meteors.add(new Meteor(
-				r.nextInt(Gdx.graphics.getWidth()),
-				r.nextInt(Gdx.graphics.getHeight()),
-				new Texture(Gdx.files.internal("resources/img/meteors/met_med.png"))
-				)
-		);
+		for(int i = 0; i < 4 + Asteroids.r.nextInt(4); i++){
+            meteors.add(new Meteor(0));
+		}
 	}
 }
