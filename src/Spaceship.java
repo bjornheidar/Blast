@@ -21,11 +21,13 @@ public class Spaceship extends Collidable {
 	public void turnRight(){
 		sprite.rotate(-heading_change);
 		speedchange.rotate(-heading_change);
+		//lazorcannon.rotate(-heading_change);
 	}
 	
 	public void turnLeft(){
 		sprite.rotate(heading_change);
 		speedchange.rotate(heading_change);
+		//lazorcannon.rotate(heading_change);
 	}
 
 	public void accelerate() {

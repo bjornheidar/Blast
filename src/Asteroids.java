@@ -15,7 +15,7 @@ import com.badlogic.gdx.math.Intersector;
 
 
 public class Asteroids implements ApplicationListener {
-	private SpriteBatch batch;
+	private static SpriteBatch batch;
 	private OrthographicCamera camera;
 	
 	private ArrayList<Meteor> meteors;
@@ -24,6 +24,9 @@ public class Asteroids implements ApplicationListener {
 	
 	private ArrayList<Lazor> shots;
 	private ArrayList<Lazor> landedShots;
+	
+	private ArrayList<Explosion> explos;
+	private ArrayList<Explosion> doneexplos;
 	
 	private Spaceship deathstar;
 	private boolean renderShip;
@@ -38,12 +41,14 @@ public class Asteroids implements ApplicationListener {
 	private long wintime;
 	private boolean haswon;
 	private Sound win;
+	private int level;
 	
 	private int lives;
 	private Texture livestex;
 	private long deathtime;
 	private Sound gameover;
 	private boolean lost;
+	private Sound deathsound;
 	
 	private static Random r = new Random();
 	
@@ -61,11 +66,15 @@ public class Asteroids implements ApplicationListener {
 		
 		shots = new ArrayList<Lazor>();
 		landedShots = new ArrayList<Lazor>();
+		
+		explos = new ArrayList<Explosion>();
+		doneexplos = new ArrayList<Explosion>();
 		   
 		deathstar = new Spaceship(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
 		renderShip = true;
 		lastShot =  0;
-		lives = 0;
+		lives = 3;
+		deathsound = Gdx.audio.newSound(Gdx.files.internal("resources/sounds/ship_explode.mp3"));
 		livestex = new Texture(Gdx.files.internal("resources/img/lives.png"));
 		gameover = Gdx.audio.newSound(Gdx.files.internal("resources/sounds/lose.mp3"));
 		lost = false;
@@ -77,6 +86,7 @@ public class Asteroids implements ApplicationListener {
 		
 		haswon = false;
 		win =  Gdx.audio.newSound(Gdx.files.internal("resources/sounds/winning.mp3"));
+		level = 1;
 		
 		this.initializeMeteors();
 		
@@ -144,7 +154,8 @@ public class Asteroids implements ApplicationListener {
 			if(Intersector.overlapRectangles(deathstar.getBoundingRectangle(), m.getBoundingRectangle())){
 				if(System.currentTimeMillis() - deathtime > 5000){
 					deathtime = System.currentTimeMillis();
-					death();
+					death(m);
+					explos.add(new Explosion(m.getX(), m.getY(), batch));
 				}
 			}
 			
@@ -155,31 +166,35 @@ public class Asteroids implements ApplicationListener {
 					newMeteors.addAll(m.explode());
 					landedShots.add(l);
 					score++;
+					explos.add(new Explosion(m.getX(), m.getY(), batch));
 				}
 			}
 		}
 		
 		if(!explodedMeteors.isEmpty()){
 			meteors.removeAll(explodedMeteors);
+			explodedMeteors.clear();
 		}
 		
 		if(!newMeteors.isEmpty()){
 			meteors.addAll(newMeteors);
+			newMeteors.clear();
 		}
 		
 		if(!landedShots.isEmpty()){
 			shots.removeAll(landedShots);
+			landedShots.clear();
 		}
 		
-		newMeteors.clear();
-		explodedMeteors.clear();
-		landedShots.clear();
-		
 		//Winning
-		if(meteors.isEmpty() && !haswon){
-			win.play();
-			wintime = System.currentTimeMillis();
+		if(!haswon && meteors.isEmpty()){
 			haswon = true;
+			if(!lost){
+				win.play();
+			}
+			wintime = System.currentTimeMillis();
+			score += 50;
+			level++;
 		}
 		
 		//After some time new level
@@ -224,11 +239,31 @@ public class Asteroids implements ApplicationListener {
 			deathstar.draw(batch);
 		}
 		
+		boolean drawn;
+		for(Explosion e : explos){
+			drawn = e.draw();
+			System.out.println(drawn);
+			if(!drawn){
+				doneexplos.add(e);
+			}
+		}
+		
+		if(!doneexplos.isEmpty()){
+			explos.removeAll(doneexplos);
+			doneexplos.clear();
+		}
+		
 		for(int i = 0; i < lives; i++){
 			batch.draw(livestex, 10 + i * 30, Gdx.graphics.getHeight() - 40);
 		}
 		
-		font.draw(batch, "Score: " + score, 10, Gdx.graphics.getHeight() - 60);
+		font.draw(batch, "Score: " + score, 10, Gdx.graphics.getHeight() - 45);
+		font.draw(batch, "Level " + level, 10, Gdx.graphics.getHeight() - 60);
+		
+		if(haswon && !lost){
+			largeFont.draw(batch, "Level " + (level-1) + " Complete", Gdx.graphics.getWidth()/2 -150, Gdx.graphics.getHeight()/2+50);
+			largeFont.draw(batch, "More Asteroids incoming!", Gdx.graphics.getWidth()/2 -200, Gdx.graphics.getHeight()/2);
+		}
 		
 		if(lost){
 			largeFont.draw(batch, "Game Over", Gdx.graphics.getWidth()/2 -100, Gdx.graphics.getHeight()/2+50);
@@ -254,16 +289,20 @@ public class Asteroids implements ApplicationListener {
 	}
 	
 	private void initializeMeteors(){
-		for(int i = 0; i < 2 + Asteroids.r.nextInt(4); i++){
+		/*for(int i = 0; i < level + Asteroids.r.nextInt(3); i++){
             meteors.add(new Meteor(2));
-		}
-		//meteors.add(new Meteor(0));
+		}*/
+		meteors.add(new Meteor(0));
 	}
 	
-	private void death(){
+	private void death(Meteor m){
 		deathstar.setPos(-1000, -1000);
 		renderShip = false;
 		deathstar.explode();
+		explodedMeteors.add(m);
+		newMeteors.addAll(m.explode());
+		
+		deathsound.play();
 		
 		if(lives == 0){
 			gameOver();

@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 
 
@@ -15,6 +16,8 @@ public class Meteor extends Collidable {
 		new Texture(Gdx.files.internal("resources/img/meteors/met_med.png")),
 		new Texture(Gdx.files.internal("resources/img/meteors/met_large.png"))
 	};
+	
+	private static final Sound explo = Gdx.audio.newSound(Gdx.files.internal("resources/sounds/met_explode.mp3"));
 
 	
 	public Meteor(int size) {
@@ -78,6 +81,7 @@ public class Meteor extends Collidable {
 	}
 	
 	public ArrayList<Meteor> explode(){
+		explo.play();
 		ArrayList<Meteor> a = new ArrayList<Meteor>();
 		
 		if(metSize == 0){
